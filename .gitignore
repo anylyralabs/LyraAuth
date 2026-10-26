@@ -1,0 +1,34 @@
+# ---- 环境与凭据（绝不提交）----
+.env
+.env.local
+demo/.env
+
+# ---- 运行期产物 ----
+runtime/
+/storage/keys/oauth/*
+!/storage/keys/oauth/.gitkeep
+
+# ---- 依赖 ----
+vendor/
+node_modules/
+
+# ---- 构建产物 ----
+/public/assets/app.css
+/public/assets/app.js
+
+# ---- 测试与静态分析缓存 ----
+/.phpunit.cache/
+.phpunit.result.cache
+*.cache
+/phpunit.xml
+/phpstan.neon
+
+# ---- 编辑器与系统 ----
+.idea/
+.vscode/
+.buildpath
+.settings/
+.project
+.phpintel/
+.DS_Store
+*.patch

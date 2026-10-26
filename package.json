@@ -1,0 +1,18 @@
+{
+  "name": "lyraauth",
+  "private": true,
+  "version": "0.1.0",
+  "description": "LyraAuth frontend assets (Tailwind CSS + vanilla JS)",
+  "scripts": {
+    "build:css": "tailwindcss -i ./resources/css/app.css -o ./public/assets/app.css --minify",
+    "build:js": "esbuild resources/js/app.js --bundle --minify --target=es2020 --outfile=public/assets/app.js",
+    "build": "pnpm run build:css && pnpm run build:js",
+    "dev:css": "tailwindcss -i ./resources/css/app.css -o ./public/assets/app.css --watch",
+    "dev:js": "esbuild resources/js/app.js --bundle --target=es2020 --outfile=public/assets/app.js --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^4.3.3"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "lyraauth-demo-rp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "LyraAuth 的 OIDC 演示客户端（Relying Party），零依赖",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs"
+  }
+}
