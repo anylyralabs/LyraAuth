@@ -8,22 +8,23 @@
     ];
 @endphp
 
-<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <nav class="flex gap-1 rounded-[7px] border border-line bg-surface p-1" aria-label="日志类型">
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4 border-b border-line">
+    <nav class="flex gap-5" aria-label="日志类型">
         @foreach ($tabs as $item)
             <a href="/admin/audit-logs?tab={{ $item['key'] }}"
-               class="rounded-[5px] px-3 py-1.5 text-[13px] {{ $tab === $item['key'] ? 'bg-brand-soft font-medium text-brand' : 'text-ink-soft hover:bg-[#f1f3f5]' }}">
+               class="-mb-px border-b-2 pb-2 text-[13px] transition-colors {{ $tab === $item['key'] ? 'border-brand font-medium text-ink' : 'border-transparent text-muted hover:text-ink' }}"
+               @if ($tab === $item['key']) aria-current="page" @endif>
                 {{ $item['label'] }}
             </a>
         @endforeach
     </nav>
 
-    <form method="GET" action="/admin/audit-logs" class="flex flex-wrap items-end gap-2">
+    <form method="GET" action="/admin/audit-logs" class="mb-3 flex flex-wrap items-end gap-2.5">
         <input type="hidden" name="tab" value="{{ $tab }}">
         @if ($tab === 'audit')
             <div>
                 <label for="action" class="field-label">动作</label>
-                <input id="action" name="action" type="text" value="{{ $action }}" class="field-input w-44" placeholder="如 auth.login">
+                <input id="action" name="action" type="text" value="{{ $action }}" class="field-input w-44 font-mono !text-[12px]" placeholder="auth.login">
             </div>
         @endif
         <div>
@@ -54,7 +55,7 @@
 <div class="panel overflow-hidden">
     <div class="overflow-x-auto">
         @if ($tab === 'audit')
-            <table class="data-table">
+            <table class="data-table table-fixed">
                 <thead>
                     <tr>
                         <th class="w-[16%]">时间</th>
@@ -68,10 +69,10 @@
                 <tbody>
                     @forelse ($logs as $log)
                         <tr>
-                            <td class="whitespace-nowrap text-xs">{{ $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('m-d H:i:s') : '—' }}</td>
-                            <td class="font-mono text-[12px] text-ink">{{ $log->action }}</td>
-                            <td class="hidden max-w-0 truncate text-xs md:table-cell">{{ $log->actor_label ?: '—' }}</td>
-                            <td class="hidden font-mono text-xs lg:table-cell">{{ $log->ip_address ?: '—' }}</td>
+                            <td class="whitespace-nowrap font-mono text-[11.5px] text-muted" title="{{ $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('Y-m-d H:i:s') : '' }}">{{ $log->created_at ? \Carbon\Carbon::parse($log->created_at)->format('m-d H:i') : '—' }}</td>
+                            <td class="max-w-0 truncate font-mono text-[12px] text-ink" title="{{ $log->action }}">{{ $log->action }}</td>
+                            <td class="hidden max-w-0 truncate text-[12px] md:table-cell">{{ $log->actor_label ?: '—' }}</td>
+                            <td class="hidden font-mono text-[11.5px] lg:table-cell">{{ $log->ip_address ?: '—' }}</td>
                             <td>
                                 @if ($log->result === 'success')
                                     <span class="badge badge-success">成功</span>
@@ -83,34 +84,34 @@
                             </td>
                             <td class="text-right">
                                 @if ($log->meta || $log->target_type)
-                                    <details class="inline-block text-left">
+                                    <details class="relative inline-block text-left" data-menu>
                                         <summary class="btn btn-ghost btn-sm cursor-pointer list-none">查看</summary>
-                                        <div class="panel absolute right-4 z-30 mt-1 w-72 p-3 text-left">
-                                            <dl class="space-y-1.5 text-xs">
+                                        <div class="panel absolute right-0 z-30 mt-1 w-72 p-3 text-left">
+                                            <dl class="space-y-2 text-[12px]">
                                                 @if ($log->target_type)
-                                                    <div class="flex gap-2"><dt class="w-16 shrink-0 text-muted">目标</dt><dd class="break-all text-ink">{{ $log->target_type }}#{{ $log->target_id }}</dd></div>
+                                                    <div class="flex gap-2"><dt class="w-14 shrink-0 text-muted">目标</dt><dd class="break-all font-mono text-[11px] text-ink">{{ $log->target_type }}#{{ $log->target_id }}</dd></div>
                                                 @endif
                                                 @if ($log->user_agent)
-                                                    <div class="flex gap-2"><dt class="w-16 shrink-0 text-muted">UA</dt><dd class="break-all text-ink-soft">{{ $log->user_agent }}</dd></div>
+                                                    <div class="flex gap-2"><dt class="w-14 shrink-0 text-muted">UA</dt><dd class="break-all text-[11px] leading-[1.5] text-ink-soft">{{ $log->user_agent }}</dd></div>
                                                 @endif
                                                 @if ($log->meta)
-                                                    <div class="flex gap-2"><dt class="w-16 shrink-0 text-muted">上下文</dt><dd class="break-all font-mono text-[11px] text-ink-soft">{{ $log->meta }}</dd></div>
+                                                    <div class="flex gap-2"><dt class="w-14 shrink-0 text-muted">上下文</dt><dd class="break-all font-mono text-[10.5px] leading-[1.55] text-ink-soft">{{ $log->meta }}</dd></div>
                                                 @endif
                                             </dl>
                                         </div>
                                     </details>
                                 @else
-                                    <span class="text-xs text-muted">—</span>
+                                    <span class="text-[12px] text-faint">—</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="py-10 text-center text-sm text-muted">没有符合条件的记录。</td></tr>
+                        <tr><td colspan="6" class="py-10 text-center text-[13px] text-muted">没有符合条件的记录。</td></tr>
                     @endforelse
                 </tbody>
             </table>
         @else
-            <table class="data-table">
+            <table class="data-table table-fixed">
                 <thead>
                     <tr>
                         <th class="w-[18%]">时间</th>
@@ -123,9 +124,9 @@
                 <tbody>
                     @forelse ($attempts as $attempt)
                         <tr>
-                            <td class="whitespace-nowrap text-xs">{{ $attempt->created_at ? \Carbon\Carbon::parse($attempt->created_at)->format('m-d H:i:s') : '—' }}</td>
-                            <td class="max-w-0 truncate text-[13px]">{{ $attempt->identifier ?: '—' }}</td>
-                            <td class="hidden font-mono text-xs sm:table-cell">{{ $attempt->ip_address ?: '—' }}</td>
+                            <td class="whitespace-nowrap font-mono text-[11.5px] text-muted">{{ $attempt->created_at ? \Carbon\Carbon::parse($attempt->created_at)->format('m-d H:i') : '—' }}</td>
+                            <td class="max-w-0 truncate font-mono text-[12px] text-ink">{{ $attempt->identifier ?: '—' }}</td>
+                            <td class="hidden font-mono text-[11.5px] sm:table-cell">{{ $attempt->ip_address ?: '—' }}</td>
                             <td>
                                 @if ($attempt->result === 'success')
                                     <span class="badge badge-success">成功</span>
@@ -135,10 +136,10 @@
                                     <span class="badge badge-warning">{{ $attempt->result === 'locked' ? '锁定' : '阻止' }}</span>
                                 @endif
                             </td>
-                            <td class="hidden text-xs lg:table-cell">{{ $attempt->user_id ? '#' . $attempt->user_id : '—' }}</td>
+                            <td class="hidden font-mono text-[11.5px] lg:table-cell">{{ $attempt->user_id ? '#' . $attempt->user_id : '—' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="py-10 text-center text-sm text-muted">没有符合条件的登录记录。</td></tr>
+                        <tr><td colspan="5" class="py-10 text-center text-[13px] text-muted">没有符合条件的登录记录。</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -148,8 +149,8 @@
 
 @php $page = $tab === 'audit' ? $logs : $attempts; @endphp
 @if ($page && $page->hasPages())
-    <div class="mt-4 flex items-center justify-between text-xs text-muted">
-        <span>第 {{ $page->currentPage() }} / {{ $page->lastPage() }} 页</span>
+    <div class="mt-4 flex items-center justify-between">
+        <span class="font-mono text-[11px] tracking-[0.04em] text-faint">PAGE {{ $page->currentPage() }} / {{ $page->lastPage() }}</span>
         <div class="flex gap-2">
             @if ($page->previousPageUrl())
                 <a href="{{ $page->previousPageUrl() }}&tab={{ $tab }}" class="btn btn-secondary btn-sm">上一页</a>

@@ -1,24 +1,28 @@
 @extends('layouts.shell')
 
 @section('content')
-<form method="POST" action="/account/profile" class="space-y-5">
+<form method="POST" action="/account/profile" class="space-y-4">
     @csrf
 
     <section class="panel">
         <div class="panel-header">
-            <h2 class="text-sm font-semibold text-ink">公开资料</h2>
-            <p class="mt-1 text-[13px] text-muted">显示名称会出现在同意页、应用内以及 userinfo 的 name 字段。</p>
+            <div>
+                <h2 class="panel-title">公开资料</h2>
+                <p class="panel-note">显示名称会出现在同意页、应用内以及 userinfo 的 name 字段。</p>
+            </div>
         </div>
-        <div class="panel-body space-y-4">
-            <div class="grid gap-4 sm:grid-cols-[80px_minmax(0,1fr)]">
+        <div class="panel-body space-y-5">
+            <div class="grid gap-5 sm:grid-cols-[96px_minmax(0,1fr)]">
                 <div>
                     <label for="avatar_color" class="field-label">头像颜色</label>
-                    <input id="avatar_color" name="avatar_color" type="color" value="{{ $values['avatar_color'] }}"
-                           class="h-9 w-full cursor-pointer rounded-[6px] border border-line-strong bg-white p-0.5">
-                    <span class="mt-2 flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white"
-                          style="background-color: {{ $values['avatar_color'] }}" aria-hidden="true">
-                        {{ $currentUser->initials() }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <input id="avatar_color" name="avatar_color" type="color" value="{{ $values['avatar_color'] }}"
+                               class="h-9 w-12 shrink-0 cursor-pointer border border-line-strong bg-white p-0.5">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[2px] font-mono text-[12px] font-medium"
+                              style="background-color: {{ $values['avatar_color'] }}; color: {{ \App\Support\Support::contrastText($values['avatar_color']) }}" aria-hidden="true">
+                            {{ $currentUser->initials() }}
+                        </span>
+                    </div>
                 </div>
                 <div>
                     <label for="display_name" class="field-label">显示名称</label>
@@ -30,15 +34,15 @@
                 </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid gap-4 border-t border-line pt-5 sm:grid-cols-2">
                 <div>
                     <label class="field-label">用户名</label>
-                    <input type="text" value="{{ $currentUser->username }}" class="field-input" disabled>
+                    <input type="text" value="{{ $currentUser->username }}" class="field-input font-mono" disabled>
                     <p class="field-hint">用户名创建后不可修改。</p>
                 </div>
                 <div>
                     <label class="field-label">邮箱</label>
-                    <input type="text" value="{{ $currentUser->email }}" class="field-input" disabled>
+                    <input type="text" value="{{ $currentUser->email }}" class="field-input font-mono" disabled>
                     <p class="field-hint">{{ $currentUser->isEmailVerified() ? '已验证' : '尚未验证' }}</p>
                 </div>
             </div>

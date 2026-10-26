@@ -30,17 +30,17 @@ class HomeController extends AbstractController
     {
         $svg = <<<'SVG'
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="8" fill="#2F4D5E"/>
-  <path d="M9 21.5V10.5" stroke="#F5F6F7" stroke-width="2" stroke-linecap="round"/>
-  <path d="M9 16.2L15.4 10.5" stroke="#F5F6F7" stroke-width="2" stroke-linecap="round"/>
-  <path d="M9 16.2L16 21.5" stroke="#F5F6F7" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="22.5" cy="16" r="3.2" stroke="#9DB6C4" stroke-width="1.6"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="2.5" fill="#14171A"/>
+  <path d="M10 23V9" stroke="#F5F5F2" stroke-width="2.1" stroke-linecap="square"/>
+  <path d="M10 16.4L16.6 9" stroke="#F5F5F2" stroke-width="2.1" stroke-linecap="square"/>
+  <path d="M10 16.4L17.2 23" stroke="#F5F5F2" stroke-width="2.1" stroke-linecap="square"/>
+  <circle cx="22.6" cy="16" r="3.1" stroke="#96631C" stroke-width="1.7"/>
 </svg>
 SVG;
 
         return $this->response
+            ->raw($svg)
             ->withHeader('Content-Type', 'image/svg+xml; charset=utf-8')
-            ->withHeader('Cache-Control', 'public, max-age=604800')
-            ->raw($svg);
+            ->withHeader('Cache-Control', 'public, max-age=604800');
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use App\Support\Support;
 use Hyperf\Database\Model\Relations\HasMany;
 use Hyperf\Database\Model\SoftDeletes;
 
@@ -104,5 +105,11 @@ class User extends Model
         $first = mb_substr($name, 0, 1, 'UTF-8');
 
         return mb_strtoupper($first, 'UTF-8');
+    }
+
+    /** 头像前景色：浅色底自动改用深色字 */
+    public function avatarInk(): string
+    {
+        return Support::contrastText((string) $this->avatar_color);
     }
 }

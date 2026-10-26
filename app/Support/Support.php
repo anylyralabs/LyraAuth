@@ -46,4 +46,29 @@ final class Support
     {
         return rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
     }
+
+    /**
+     * 依据背景色亮度选择可读的前景色。
+     *
+     * 用于用户头像与客户端图标：允许用户选择任意颜色，但文字必须保持可读。
+     */
+    public static function contrastText(string $background, string $dark = '#14171A', string $light = '#FFFFFF'): string
+    {
+        $hex = ltrim(trim($background), '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (strlen($hex) !== 6 || ! ctype_xdigit($hex)) {
+            return $light;
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        // 感知亮度（ITU-R BT.601）：浅色背景改用深色字
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+
+        return $luminance > 0.62 ? $dark : $light;
+    }
 }

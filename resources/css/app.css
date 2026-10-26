@@ -3,49 +3,87 @@
 @source "../../storage/view";
 @source "../../app";
 
+/* ============================================================
+   字体
+   本地化，避免外链与 FOIT；中文回退到系统无衬线字体
+   ============================================================ */
+@font-face {
+    font-family: "Bricolage Grotesque";
+    src: url("/assets/fonts/bricolage.woff2") format("woff2");
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Instrument Sans";
+    src: url("/assets/fonts/instrument-sans.woff2") format("woff2");
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("/assets/fonts/plex-mono.woff2") format("woff2");
+    font-weight: 400 500;
+    font-style: normal;
+    font-display: swap;
+}
+
 @theme {
-    /* 中性色阶 —— 低饱和，冷灰基底 */
-    --color-canvas: #f5f6f7;
+    /* 底色与表面：冷灰纸白，不是暖米色 */
+    --color-canvas: #f5f5f2;
     --color-surface: #ffffff;
-    --color-ink: #131a21;
-    --color-ink-soft: #3d4854;
-    --color-muted: #66727f;
-    --color-line: #e2e6ea;
-    --color-line-strong: #cbd2d9;
+    --color-sunk: #fafaf7;
 
-    /* 品牌色 —— 深蓝灰，稳重克制 */
-    --color-brand: #2f4d5e;
-    --color-brand-hover: #243d4b;
-    --color-brand-soft: #eef3f6;
-    --color-brand-line: #c9d8e0;
+    /* 文字：近黑墨，分三级 */
+    --color-ink: #14171a;
+    --color-ink-soft: #43484e;
+    --color-muted: #767c82;
+    --color-faint: #9aa0a5;
 
-    /* 语义色 —— 统一降低饱和度 */
-    --color-danger: #9b3b39;
-    --color-danger-soft: #fbf0ef;
-    --color-danger-line: #eed3d1;
-    --color-success: #2f6a4f;
-    --color-success-soft: #eff6f1;
-    --color-success-line: #cfe3d6;
-    --color-warning: #8a6524;
-    --color-warning-soft: #fbf5e9;
-    --color-warning-line: #ece0c4;
-    --color-info: #33596e;
+    /* 线：所有层次靠线建立，不靠阴影 */
+    --color-line: #e4e4de;
+    --color-line-strong: #c8c8c0;
+
+    /* 黄铜：唯一强调色，只用于主操作、当前状态、关键读数 */
+    --color-brand: #96631c;
+    --color-brand-hover: #7a4f14;
+    --color-brand-soft: #f8f1e4;
+    --color-brand-line: #e5d5b8;
+
+    /* 语义色 */
+    --color-danger: #a03a32;
+    --color-danger-soft: #fbf1ef;
+    --color-danger-line: #efd6d2;
+    --color-success: #2c6a4a;
+    --color-success-soft: #f0f6f2;
+    --color-success-line: #d2e4d9;
+    --color-warning: #8a6520;
+    --color-warning-soft: #fbf5e8;
+    --color-warning-line: #ede0c6;
+    --color-info: #2f5568;
     --color-info-soft: #f0f5f8;
-    --color-info-line: #d3e2ea;
+    --color-info-line: #d5e2e9;
 
-    --font-sans: "Inter", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+    /* 字体栈 */
+    --font-sans: "Instrument Sans", "PingFang SC", "Hiragino Sans GB",
+        "Microsoft YaHei", "Noto Sans SC", "WenQuanYi Micro Hei", sans-serif;
+    --font-display: "Bricolage Grotesque", "Instrument Sans", "PingFang SC",
+        "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+        monospace;
 
-    --radius-card: 10px;
-    --radius-control: 7px;
-
-    --shadow-panel: 0 1px 2px rgba(19, 26, 33, 0.04), 0 8px 24px -16px rgba(19, 26, 33, 0.18);
-    --shadow-raised: 0 1px 3px rgba(19, 26, 33, 0.06), 0 12px 32px -20px rgba(19, 26, 33, 0.24);
+    /* 圆角：克制。面板近方，控件 4px */
+    --radius-panel: 3px;
+    --radius-control: 4px;
 }
 
 @layer base {
-    * {
+    *,
+    *::before,
+    *::after {
         border-color: var(--color-line);
     }
 
@@ -58,9 +96,11 @@
         background-color: var(--color-canvas);
         color: var(--color-ink);
         font-family: var(--font-sans);
-        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        font-size: 14px;
+        line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         text-rendering: optimizeLegibility;
+        font-feature-settings: "ss01" 1;
     }
 
     ::selection {
@@ -78,61 +118,152 @@
     pre,
     samp {
         font-family: var(--font-mono);
+        font-size: 0.9em;
+    }
+
+    /* 标题统一用展示字体 */
+    h1,
+    h2,
+    h3 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+    }
+
+    /* 表格数字对齐 */
+    table {
+        font-variant-numeric: tabular-nums;
     }
 }
 
 @layer components {
-    /* 卡片 */
+    /* ----------------------------------------------------------
+       面板：近方角、单线边界、无阴影
+       ---------------------------------------------------------- */
     .panel {
         background-color: var(--color-surface);
         border: 1px solid var(--color-line);
-        border-radius: var(--radius-card);
-        box-shadow: var(--shadow-panel);
+        border-radius: var(--radius-panel);
     }
 
     .panel-header {
-        padding: 1.125rem 1.375rem;
+        padding: 14px 18px;
         border-bottom: 1px solid var(--color-line);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .panel-header > :only-child {
+        width: 100%;
     }
 
     .panel-body {
-        padding: 1.375rem;
+        padding: 18px;
     }
 
-    /* 表单 */
+    .panel-title {
+        font-family: var(--font-display);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--color-ink);
+    }
+
+    .panel-note {
+        margin-top: 2px;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: var(--color-muted);
+    }
+
+    /* 无边框分区：用顶线分隔，像文档分节 */
+    .section-rule {
+        border-top: 1px solid var(--color-line);
+        padding-top: 16px;
+    }
+
+    /* ----------------------------------------------------------
+       页面头部：标题 + 说明，左侧一条铜色短线作为锚点
+       ---------------------------------------------------------- */
+    .page-head {
+        margin-bottom: 22px;
+        padding-left: 14px;
+        border-left: 2px solid var(--color-brand);
+    }
+
+    .page-head h1 {
+        margin: 0;
+        font-size: 21px;
+        font-weight: 600;
+        color: var(--color-ink);
+    }
+
+    .page-head p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--color-muted);
+    }
+
+    /* 小节标题 */
+    .section-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-family: var(--font-display);
+        font-size: 13.5px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--color-ink);
+    }
+
+    /* ----------------------------------------------------------
+       表单
+       ---------------------------------------------------------- */
     .field-label {
         display: block;
-        font-size: 0.8125rem;
+        margin-bottom: 5px;
+        font-size: 12.5px;
         font-weight: 500;
         color: var(--color-ink-soft);
-        margin-bottom: 0.375rem;
     }
 
     .field-input {
         display: block;
         width: 100%;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        line-height: 1.5rem;
+        padding: 7px 10px;
+        font-family: inherit;
+        font-size: 13.5px;
+        line-height: 1.5;
         color: var(--color-ink);
         background-color: var(--color-surface);
         border: 1px solid var(--color-line-strong);
         border-radius: var(--radius-control);
-        transition: border-color 120ms ease, box-shadow 120ms ease;
+        transition: border-color 100ms ease, box-shadow 100ms ease;
     }
 
     .field-input::placeholder {
-        color: #9aa4af;
+        color: var(--color-faint);
+    }
+
+    .field-input:hover:not(:disabled) {
+        border-color: #b3b3aa;
     }
 
     .field-input:focus {
         outline: none;
         border-color: var(--color-brand);
-        box-shadow: 0 0 0 3px rgba(47, 77, 94, 0.12);
+        box-shadow: 0 0 0 3px rgba(150, 99, 28, 0.13);
     }
 
     .field-input:disabled {
-        background-color: #f4f5f6;
+        background-color: var(--color-sunk);
         color: var(--color-muted);
         cursor: not-allowed;
     }
@@ -142,199 +273,218 @@
     }
 
     .field-input[aria-invalid="true"]:focus {
-        box-shadow: 0 0 0 3px rgba(155, 59, 57, 0.12);
+        box-shadow: 0 0 0 3px rgba(160, 58, 50, 0.12);
     }
 
     .field-hint {
-        margin-top: 0.375rem;
-        font-size: 0.75rem;
-        line-height: 1.25rem;
+        margin-top: 5px;
+        font-size: 11.5px;
+        line-height: 1.5;
         color: var(--color-muted);
     }
 
     .field-error {
-        margin-top: 0.375rem;
-        font-size: 0.75rem;
-        line-height: 1.25rem;
+        margin-top: 5px;
+        font-size: 11.5px;
+        line-height: 1.5;
         color: var(--color-danger);
     }
 
-    /* 按钮 */
+    /* ----------------------------------------------------------
+       按钮
+       ---------------------------------------------------------- */
     .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.4375rem;
-        padding: 0.5rem 0.9375rem;
-        font-size: 0.875rem;
+        gap: 6px;
+        padding: 7px 14px;
+        font-family: inherit;
+        font-size: 13px;
         font-weight: 500;
-        line-height: 1.25rem;
-        border-radius: var(--radius-control);
+        line-height: 1.4;
+        color: var(--color-ink-soft);
+        background-color: transparent;
         border: 1px solid transparent;
+        border-radius: var(--radius-control);
         cursor: pointer;
-        transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
         white-space: nowrap;
         text-decoration: none;
+        transition: background-color 100ms ease, border-color 100ms ease,
+            color 100ms ease;
     }
 
     .btn:disabled {
-        opacity: 0.55;
+        opacity: 0.5;
         cursor: not-allowed;
     }
 
     .btn-primary {
-        background-color: var(--color-brand);
         color: #fff;
+        background-color: var(--color-brand);
+        border-color: var(--color-brand);
     }
 
     .btn-primary:hover:not(:disabled) {
         background-color: var(--color-brand-hover);
+        border-color: var(--color-brand-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+        transform: translateY(0.5px);
     }
 
     .btn-secondary {
+        color: var(--color-ink-soft);
         background-color: var(--color-surface);
         border-color: var(--color-line-strong);
-        color: var(--color-ink-soft);
     }
 
     .btn-secondary:hover:not(:disabled) {
-        background-color: #f7f8f9;
-        border-color: var(--color-line-strong);
+        background-color: var(--color-sunk);
+        border-color: #b3b3aa;
         color: var(--color-ink);
     }
 
     .btn-ghost {
-        background-color: transparent;
         color: var(--color-muted);
     }
 
     .btn-ghost:hover:not(:disabled) {
-        background-color: #eceff1;
+        background-color: #edede8;
         color: var(--color-ink);
     }
 
     .btn-danger {
-        background-color: var(--color-danger);
         color: #fff;
+        background-color: var(--color-danger);
+        border-color: var(--color-danger);
     }
 
     .btn-danger:hover:not(:disabled) {
-        background-color: #85322f;
+        background-color: #8a302a;
+        border-color: #8a302a;
     }
 
     .btn-sm {
-        padding: 0.3125rem 0.625rem;
-        font-size: 0.8125rem;
-        line-height: 1.125rem;
+        padding: 4px 9px;
+        font-size: 12px;
     }
 
     .btn-block {
         width: 100%;
     }
 
-    /* 徽标 */
+    /* ----------------------------------------------------------
+       徽标：方角，等宽字体，像仪器标签
+       ---------------------------------------------------------- */
     .badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.3125rem;
-        padding: 0.125rem 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-        line-height: 1.125rem;
-        border-radius: 999px;
+        gap: 4px;
+        padding: 1px 6px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 400;
+        line-height: 1.5;
+        letter-spacing: 0.01em;
         border: 1px solid transparent;
+        border-radius: 2px;
         white-space: nowrap;
     }
 
     .badge-neutral {
-        background-color: #f1f3f5;
         color: var(--color-ink-soft);
+        background-color: var(--color-sunk);
         border-color: var(--color-line);
     }
 
     .badge-brand {
-        background-color: var(--color-brand-soft);
         color: var(--color-brand);
+        background-color: var(--color-brand-soft);
         border-color: var(--color-brand-line);
     }
 
     .badge-success {
-        background-color: var(--color-success-soft);
         color: var(--color-success);
+        background-color: var(--color-success-soft);
         border-color: var(--color-success-line);
     }
 
     .badge-danger {
-        background-color: var(--color-danger-soft);
         color: var(--color-danger);
+        background-color: var(--color-danger-soft);
         border-color: var(--color-danger-line);
     }
 
     .badge-warning {
-        background-color: var(--color-warning-soft);
         color: var(--color-warning);
+        background-color: var(--color-warning-soft);
         border-color: var(--color-warning-line);
     }
 
-    /* 提示条 */
+    /* ----------------------------------------------------------
+       提示条：左侧色条，不用整块填充
+       ---------------------------------------------------------- */
     .alert {
         display: flex;
-        gap: 0.625rem;
-        padding: 0.75rem 0.875rem;
-        font-size: 0.8125rem;
-        line-height: 1.375rem;
-        border-radius: var(--radius-control);
-        border: 1px solid transparent;
+        gap: 10px;
+        padding: 10px 12px 10px 11px;
+        font-size: 13px;
+        line-height: 1.55;
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-line);
+        border-left: 3px solid var(--color-line-strong);
+        border-radius: 2px;
+        color: var(--color-ink-soft);
     }
 
     .alert-error {
+        border-left-color: var(--color-danger);
         background-color: var(--color-danger-soft);
-        border-color: var(--color-danger-line);
-        color: #7b2f2d;
     }
 
     .alert-success {
+        border-left-color: var(--color-success);
         background-color: var(--color-success-soft);
-        border-color: var(--color-success-line);
-        color: #285843;
     }
 
     .alert-info {
+        border-left-color: var(--color-info);
         background-color: var(--color-info-soft);
-        border-color: var(--color-info-line);
-        color: var(--color-info);
     }
 
     .alert-warning {
+        border-left-color: var(--color-warning);
         background-color: var(--color-warning-soft);
-        border-color: var(--color-warning-line);
-        color: #6f5220;
     }
 
-    /* 表格 */
+    /* ----------------------------------------------------------
+       表格：行间细线，表头不喧哗
+       ---------------------------------------------------------- */
     .data-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.875rem;
+        font-size: 13px;
     }
 
     .data-table thead th {
-        padding: 0.625rem 1rem;
+        padding: 8px 14px;
         text-align: left;
-        font-size: 0.75rem;
+        font-family: var(--font-sans);
+        font-size: 11.5px;
         font-weight: 600;
         letter-spacing: 0.02em;
-        text-transform: uppercase;
         color: var(--color-muted);
-        background-color: #fafbfb;
+        background-color: var(--color-sunk);
         border-bottom: 1px solid var(--color-line);
         white-space: nowrap;
     }
 
     .data-table tbody td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid var(--color-line);
+        padding: 10px 14px;
         color: var(--color-ink-soft);
+        border-bottom: 1px solid var(--color-line);
         vertical-align: middle;
     }
 
@@ -343,14 +493,91 @@
     }
 
     .data-table tbody tr:hover {
-        background-color: #fafbfb;
+        background-color: var(--color-sunk);
     }
 
-    /* 分隔线 */
+    /* ----------------------------------------------------------
+       键值表：用于展示单个实体的字段
+       ---------------------------------------------------------- */
+    .spec {
+        display: grid;
+        grid-template-columns: minmax(96px, 28%) 1fr;
+        gap: 0;
+        margin: 0;
+        font-size: 13px;
+    }
+
+    .spec dt,
+    .spec dd {
+        margin: 0;
+        padding: 7px 0;
+        border-bottom: 1px solid var(--color-line);
+    }
+
+    .spec dt {
+        color: var(--color-muted);
+        font-size: 12.5px;
+    }
+
+    .spec dd {
+        color: var(--color-ink);
+        word-break: break-word;
+    }
+
+    .spec > :nth-last-child(-n + 2) {
+        border-bottom: none;
+    }
+
+    /* ----------------------------------------------------------
+       读数：仪表盘上的关键数字
+       ---------------------------------------------------------- */
+    .readout {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 14px 16px;
+    }
+
+    .readout-label {
+        font-size: 11.5px;
+        color: var(--color-muted);
+    }
+
+    .readout-value {
+        font-family: var(--font-display);
+        font-size: 26px;
+        font-weight: 600;
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+        color: var(--color-ink);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .readout-note {
+        font-size: 11.5px;
+        color: var(--color-muted);
+    }
+
+    .readout-note .accent {
+        color: var(--color-brand);
+    }
+
+    /* ----------------------------------------------------------
+       分隔线
+       ---------------------------------------------------------- */
     .divider {
         height: 1px;
         background-color: var(--color-line);
         border: none;
+    }
+
+    /* ----------------------------------------------------------
+       等宽文本
+       ---------------------------------------------------------- */
+    .mono {
+        font-family: var(--font-mono);
+        font-size: 0.92em;
+        letter-spacing: -0.01em;
     }
 }
 
@@ -359,10 +586,49 @@
         text-wrap: balance;
     }
 
+    /* 坐标网格：只在品牌区使用，暗示"系统"而非装饰 */
     .grid-lines {
-        background-image:
-            linear-gradient(to right, rgba(19, 26, 33, 0.045) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(19, 26, 33, 0.045) 1px, transparent 1px);
-        background-size: 56px 56px;
+        background-image: linear-gradient(
+                to right,
+                rgba(20, 23, 26, 0.04) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                to bottom,
+                rgba(20, 23, 26, 0.04) 1px,
+                transparent 1px
+            );
+        background-size: 40px 40px;
+    }
+
+    /* 细密网格，用于表单页背景 */
+    .grid-fine {
+        background-image: linear-gradient(
+                to right,
+                rgba(20, 23, 26, 0.028) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                to bottom,
+                rgba(20, 23, 26, 0.028) 1px,
+                transparent 1px
+            );
+        background-size: 24px 24px;
+    }
+
+    .select-all {
+        user-select: all;
+    }
+}
+
+/* 尊重减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }

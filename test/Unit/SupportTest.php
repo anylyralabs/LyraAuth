@@ -93,6 +93,17 @@ class SupportTest extends TestCase
         $this->assertNotSame('token', Crypto::hash('token'));
     }
 
+    public function testContrastTextKeepsInitialsReadable(): void
+    {
+        $this->assertSame('#14171A', Support::contrastText('#FFFFFF'));
+        $this->assertSame('#14171A', Support::contrastText('#fff'));
+        $this->assertSame('#FFFFFF', Support::contrastText('#14171A'));
+        $this->assertSame('#FFFFFF', Support::contrastText('#96631C'));
+        // 非法输入回退到浅色前景，避免生成无法阅读的文字
+        $this->assertSame('#FFFFFF', Support::contrastText(''));
+        $this->assertSame('#FFFFFF', Support::contrastText('not-a-color'));
+    }
+
     public function testRandomTokenIsUrlSafe(): void
     {
         $token = Crypto::randomToken(32);

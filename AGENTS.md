@@ -91,6 +91,55 @@ pnpm dev:css                      # 样式监听（另开终端）
 管理员：`admin@lyraauth.local`，初始密码见 `runtime/logs/seed-credentials.log`，首次登录强制改密。
 开发环境邮件不真正发送，验证链接写入 `runtime/logs/mail.log`。
 
+## 视觉规范（WebUI）
+
+界面定位是「精密凭证 / 仪器面板」，而不是通用的卡片式后台。
+样式唯一来源是 `resources/css/app.css`：改样式先改令牌与组件类，不要在模板里堆任意值。
+
+### 色彩与字体
+
+| 角色 | 令牌 | 值 |
+|---|---|---|
+| 画布 | `--color-canvas` | `#F5F5F2` 冷灰纸白 |
+| 表面 | `--color-surface` | `#FFFFFF` |
+| 墨色 | `--color-ink` | `#14171A` |
+| 次级文字 | `--color-ink-soft` / `--color-muted` | `#43484E` / `#767C82` |
+| 细线 | `--color-line` / `--color-line-strong` | `#E4E4DE` / `#C8C8C0` |
+| 黄铜强调 | `--color-brand` | `#96631C` |
+
+- 黄铜色只用于主操作、当前状态与关键读数，不要扩大成装饰色。
+- 不使用渐变（品牌区网格线除外）、彩色阴影与 Emoji；层次靠 1px 细线建立。
+- 字体已本地化到 `public/assets/fonts/`，由 `@font-face` 引入：
+  `Bricolage Grotesque`（标题/读数）、`Instrument Sans`（正文）、`IBM Plex Mono`（数据/代码）。
+  中文回退到系统无衬线字体。
+- 深色区域统一 `bg-ink`，文字用 `#F5F5F2`；侧栏未激活项用 `#B4B9BE`。
+
+### 组件类
+
+- 布局：`.page-head`（左侧 2px 铜线标题）、`.section-title`、`.panel`、
+  `.panel-header`、`.panel-body`、`.panel-title`、`.panel-note`。
+- 表单：`.field-label`、`.field-input`、`.field-hint`、`.field-error`；
+  `.btn` + `.btn-primary` / `.btn-secondary` / `.btn-ghost` / `.btn-danger`、
+  `.btn-sm`、`.btn-block`。
+- 数据：`.data-table`、`.spec`（键值表）、`.readout` / `.readout-label` /
+  `.readout-value` / `.readout-note`。
+- 状态：`.badge` + `-brand` / `-success` / `-warning` / `-danger` / `-neutral`；
+  `.alert` + `-error` / `-success` / `-info` / `-warning`。
+- 等宽：`.mono`。圆角只允许 2–4px（面板 3px、控件 4px），不要用 `rounded-full`。
+
+### 模板约定
+
+- 页面标题与说明由控制器传入 `$pageTitle` / `$pageDescription`，`layouts/shell` 统一渲染；
+  页面内容不要重复写 `<h1>`。
+- 长表格用 `class="data-table table-fixed"`，列宽写在 `<th>` 的百分比类上。
+  需要截断的单元格加 `max-w-0 truncate` 并补 `title`，否则移动端会把操作列挤出屏幕。
+- 行内操作菜单写 `<details data-menu>`，内层用 `.panel absolute`。
+  `resources/js/app.js` 的 `initRowMenus()` 会在展开时改为 fixed 定位，
+  避免被 `.overflow-x-auto` / `.overflow-hidden` 裁切，不要依赖纯 CSS 绝对定位。
+- 动态背景色（用户头像、客户端图标）必须用 `$user->avatarInk()` /
+  `$client->logoInk()` 设置前景色，防止浅色底出现白字不可读。
+- 空状态与页脚放在内容末尾；`layouts/shell` 用 `flex-1` 占位把页脚推到底部。
+
 ## 验证方式
 
 真实浏览器验证脚本在 `tmp/`，使用 Chromium + CDP（Node 24 内置 WebSocket，零依赖）：
@@ -101,6 +150,7 @@ chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
 
 VERIFY_BASE=http://127.0.0.1:9501 node tmp/verify-auth-flow.mjs   # 注册→验证→登录→登出
 MFA_EMAIL=admin@lyraauth.local MFA_PASSWORD=... node tmp/verify-mfa.mjs  # TOTP 全流程
+ADMIN_PASSWORD=... TOTP_SECRET=... node tmp/ui-audit.mjs /tmp/opencode/shots  # 全站视觉审计
 ```
 
 验证结论必须来自真实浏览器——jsdom 无法判断布局与 WebAuthn。
@@ -228,7 +278,7 @@ ADMIN_PASSWORD=... TOTP_SECRET=... node tmp/verify-admin.mjs                  # 
   这是账户级策略，代码无法绕过。
 - **验证脚本的导航**：SPA 式等待 `document.readyState` 会误判；用 `Page.frameStoppedLoading` 事件或轮询目标选择器，并在开头 `Network.clearBrowserCookies`。
 - **`Hyperf\Testing\Client::get()` 返回解包后的数组**：要断言状态码/响应头必须用 `request()`，它返回 `TestResponse`。
-- **测试命令**：`./vendor/bin/co-phpunit --prepend test/bootstrap.php`（34 个测试）。
+- **测试命令**：`./vendor/bin/co-phpunit --prepend test/bootstrap.php`（35 个测试）。
 
 ## Demo RP（独立的 OIDC 客户端）
 

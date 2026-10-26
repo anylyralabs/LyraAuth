@@ -1,30 +1,32 @@
 @php
-    /** @var string|null $size 尺寸：sm | md | lg */
+    /** @var string $size sm | md | lg */
     $size = $size ?? 'md';
-    $markSize = match ($size) {
-        'sm' => 'h-7 w-7',
-        'lg' => 'h-11 w-11',
-        default => 'h-9 w-9',
-    };
-    $textSize = match ($size) {
-        'sm' => 'text-[15px]',
-        'lg' => 'text-xl',
-        default => 'text-base',
-    };
     $showTagline = $showTagline ?? false;
+
+    $mark = match ($size) {
+        'sm' => 'h-6 w-6',
+        'lg' => 'h-10 w-10',
+        default => 'h-8 w-8',
+    };
+    $text = match ($size) {
+        'sm' => 'text-[14px]',
+        'lg' => 'text-[19px]',
+        default => 'text-[15px]',
+    };
 @endphp
 <span class="inline-flex items-center gap-2.5">
-    <svg class="{{ $markSize }} shrink-0" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-        <rect width="32" height="32" rx="8" fill="#2F4D5E"/>
-        <path d="M9 21.5V10.5" stroke="#F5F6F7" stroke-width="2" stroke-linecap="round"/>
-        <path d="M9 16.2L15.4 10.5" stroke="#F5F6F7" stroke-width="2" stroke-linecap="round"/>
-        <path d="M9 16.2L16 21.5" stroke="#F5F6F7" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="22.5" cy="16" r="3.2" stroke="#9DB6C4" stroke-width="1.6"/>
+    {{-- 标记：一个钥匙孔形状的 L 形切口，配黄铜色的环形 --}}
+    <svg class="{{ $mark }} shrink-0" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="0.5" y="0.5" width="31" height="31" rx="2.5" fill="#14171A" stroke="#14171A"/>
+        <path d="M10 23V9" stroke="#F5F5F2" stroke-width="2.1" stroke-linecap="square"/>
+        <path d="M10 16.4L16.6 9" stroke="#F5F5F2" stroke-width="2.1" stroke-linecap="square"/>
+        <path d="M10 16.4L17.2 23" stroke="#F5F5F2" stroke-width="2.1" stroke-linecap="square"/>
+        <circle cx="22.6" cy="16" r="3.1" stroke="#96631C" stroke-width="1.7"/>
     </svg>
     <span class="inline-flex items-baseline gap-2">
-        <span class="{{ $textSize }} font-semibold tracking-tight text-ink">LyraAuth</span>
+        <span class="{{ $text }} font-semibold tracking-[-0.02em] text-ink" style="font-family: var(--font-display)">LyraAuth</span>
         @if ($showTagline)
-            <span class="hidden text-xs text-muted sm:inline">统一身份认证</span>
+            <span class="hidden text-[11px] tracking-[0.02em] text-muted sm:inline">统一身份认证</span>
         @endif
     </span>
 </span>

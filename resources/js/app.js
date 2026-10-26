@@ -97,6 +97,81 @@ const initSecretGroups = (root = document) => {
     });
 };
 
+/** 表格行内菜单：脱离滚动容器，避免被 overflow 裁切 */
+const initRowMenus = (root = document) => {
+    root.querySelectorAll('details[data-menu]').forEach((details) => {
+        if (details.dataset.bound === '1') return;
+        details.dataset.bound = '1';
+
+        const menu = details.querySelector('.panel');
+        const trigger = details.querySelector('summary');
+        if (!menu || !trigger) return;
+
+        let frame = 0;
+
+        const position = () => {
+            const rect = trigger.getBoundingClientRect();
+            const menuRect = menu.getBoundingClientRect();
+            const gap = 4;
+            const edge = 8;
+
+            let top = rect.bottom + gap;
+            if (top + menuRect.height > window.innerHeight - edge) {
+                top = Math.max(edge, rect.top - menuRect.height - gap);
+            }
+            let left = Math.min(
+                Math.max(edge, rect.right - menuRect.width),
+                Math.max(edge, window.innerWidth - menuRect.width - edge),
+            );
+
+            menu.style.position = 'fixed';
+            menu.style.margin = '0';
+            menu.style.right = 'auto';
+            menu.style.top = `${Math.round(top)}px`;
+            menu.style.left = `${Math.round(left)}px`;
+            menu.style.maxHeight = `${window.innerHeight - edge * 2}px`;
+            menu.style.overflowY = 'auto';
+        };
+
+        const schedule = () => {
+            if (frame) return;
+            frame = window.requestAnimationFrame(() => {
+                frame = 0;
+                if (details.open) position();
+            });
+        };
+
+        details.addEventListener('toggle', () => {
+            if (details.open) {
+                position();
+            } else {
+                menu.style.position = '';
+                menu.style.margin = '';
+                menu.style.right = '';
+                menu.style.top = '';
+                menu.style.left = '';
+                menu.style.maxHeight = '';
+                menu.style.overflowY = '';
+            }
+        });
+
+        window.addEventListener('scroll', schedule, true);
+        window.addEventListener('resize', schedule);
+
+        document.addEventListener('click', (event) => {
+            if (details.open && !details.contains(event.target)) {
+                details.open = false;
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Escape' || !details.open) return;
+            details.open = false;
+            trigger.focus();
+        });
+    });
+};
+
 onReady(() => {
     ensureCsrfMeta();
     initPasswordToggles();
@@ -104,6 +179,7 @@ onReady(() => {
     initConfirmForms();
     initAutoSubmit();
     initSecretGroups();
+    initRowMenus();
     initPasskeyRegister();
     initPasskeyLogin();
 });
@@ -114,4 +190,5 @@ export {
     initConfirmForms,
     initAutoSubmit,
     initSecretGroups,
+    initRowMenus,
 };

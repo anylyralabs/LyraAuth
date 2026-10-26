@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use App\Support\Support;
 use Hyperf\Database\Model\Relations\BelongsTo;
 
 /**
@@ -95,5 +96,11 @@ class OauthClient extends Model
         $name = trim($this->name);
 
         return $name === '' ? '·' : mb_strtoupper(mb_substr($name, 0, 1, 'UTF-8'), 'UTF-8');
+    }
+
+    /** 图标前景色：浅色底自动改用深色字 */
+    public function logoInk(): string
+    {
+        return Support::contrastText((string) $this->logo_color);
     }
 }

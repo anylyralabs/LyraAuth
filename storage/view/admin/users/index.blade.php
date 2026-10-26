@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-    <form method="GET" action="/admin/users" class="flex flex-wrap items-end gap-2">
+    <form method="GET" action="/admin/users" class="flex flex-wrap items-end gap-2.5">
         <div>
             <label for="q" class="field-label">搜索</label>
             <input id="q" name="q" type="search" value="{{ $keyword }}" class="field-input w-56"
@@ -22,12 +22,12 @@
             <a href="/admin/users" class="btn btn-ghost">清除</a>
         @endif
     </form>
-    <p class="text-sm text-muted">共 {{ $users->total() }} 个账号</p>
+    <p class="font-mono text-[11px] tracking-[0.06em] text-faint">TOTAL {{ $users->total() }}</p>
 </div>
 
 <div class="panel overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="data-table">
+        <table class="data-table table-fixed">
             <thead>
                 <tr>
                     <th class="w-[38%]">账号</th>
@@ -42,8 +42,8 @@
                     <tr>
                         <td>
                             <div class="flex items-center gap-2.5">
-                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                                      style="background-color: {{ $user->avatar_color }}">
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[2px] font-mono text-[11px] font-medium"
+                                      style="background-color: {{ $user->avatar_color }}; color: {{ $user->avatarInk() }}">
                                     {{ $user->initials() }}
                                 </span>
                                 <div class="min-w-0">
@@ -53,7 +53,7 @@
                                             <span class="badge badge-brand ml-1">你</span>
                                         @endif
                                     </p>
-                                    <p class="truncate text-xs text-muted">{{ $user->email }}</p>
+                                    <p class="truncate font-mono text-[11px] text-muted">{{ $user->email }}</p>
                                 </div>
                             </div>
                         </td>
@@ -61,16 +61,16 @@
                             @if ($user->isAdmin())
                                 <span class="badge badge-brand">管理员</span>
                             @else
-                                <span class="text-xs text-muted">普通用户</span>
+                                <span class="text-[12px] text-muted">普通用户</span>
                             @endif
                         </td>
                         <td class="hidden md:table-cell">
                             @if ($user->mfa_enforced)
                                 <span class="badge badge-warning">强制</span>
                             @elseif ($user->totp()->exists())
-                                <span class="text-xs text-muted">已启用</span>
+                                <span class="text-[12px] text-muted">已启用</span>
                             @else
-                                <span class="text-xs text-muted">—</span>
+                                <span class="text-[12px] text-faint">—</span>
                             @endif
                         </td>
                         <td>
@@ -91,7 +91,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="py-10 text-center text-sm text-muted">没有符合条件的账号。</td>
+                        <td colspan="5" class="py-10 text-center text-[13px] text-muted">没有符合条件的账号。</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -100,8 +100,8 @@
 </div>
 
 @if ($users->hasPages())
-    <div class="mt-4 flex items-center justify-between text-xs text-muted">
-        <span>第 {{ $users->currentPage() }} / {{ $users->lastPage() }} 页</span>
+    <div class="mt-4 flex items-center justify-between">
+        <span class="font-mono text-[11px] tracking-[0.04em] text-faint">PAGE {{ $users->currentPage() }} / {{ $users->lastPage() }}</span>
         <div class="flex gap-2">
             @if ($users->previousPageUrl())
                 <a href="{{ $users->previousPageUrl() }}" class="btn btn-secondary btn-sm">上一页</a>

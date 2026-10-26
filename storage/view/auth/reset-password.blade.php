@@ -3,27 +3,25 @@
 @section('title', '重置密码')
 
 @section('content')
-<div class="mb-7">
-    <h1 class="text-[22px] font-semibold tracking-tight text-ink">设置新密码</h1>
-    <p class="mt-1.5 text-sm leading-6 text-muted">设置完成后，该账号此前登录的所有设备都会退出登录。</p>
-</div>
+<h1 class="text-[20px] font-semibold tracking-[-0.025em] text-ink">设置新密码</h1>
+<p class="mt-1.5 text-[13px] leading-[1.65] text-muted">设置完成后，该账号此前登录的所有设备都会退出登录。</p>
 
 @if (! $valid)
-    <div class="alert alert-error mb-5" role="alert">
+    <div class="alert alert-error mt-5" role="alert">
         <span>重置链接无效或已过期。请重新发起找回密码请求。</span>
     </div>
-    <a href="/password/forgot" class="btn btn-primary btn-block">重新发送邮件</a>
+    <a href="/password/forgot" class="btn btn-primary btn-block mt-5">重新发送邮件</a>
 @else
-    <form method="POST" action="/password/reset/{{ $token }}" class="space-y-4" novalidate>
+    <form method="POST" action="/password/reset/{{ $token }}" class="mt-6 space-y-4" novalidate>
         @csrf
         <div>
             <label for="password" class="field-label">新密码</label>
             <div class="relative">
                 <input id="password" name="password" type="password"
-                       class="field-input pr-16 {{ isset($errors['password']) ? 'border-danger' : '' }}"
+                       class="field-input pr-14 {{ isset($errors['password']) ? 'border-danger' : '' }}"
                        placeholder="至少 10 位，含字母与数字" autocomplete="new-password" required autofocus>
                 <button type="button"
-                        class="absolute inset-y-0 right-0 px-3 text-xs font-medium text-muted hover:text-ink"
+                        class="absolute inset-y-0 right-0 px-2.5 text-[11.5px] text-muted transition-colors hover:text-ink"
                         data-password-toggle="password" data-label-show="显示密码" data-label-hide="隐藏密码"
                         aria-label="显示密码" aria-pressed="false">显示</button>
             </div>
@@ -44,7 +42,7 @@
             @endif
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">保存新密码</button>
+        <button type="submit" class="btn btn-primary btn-block !py-2">保存新密码</button>
     </form>
 @endif
 @endsection
