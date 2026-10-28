@@ -11,6 +11,7 @@ use App\Service\AuditService;
 use App\Service\AuthService;
 use App\Service\MfaService;
 use App\Service\SessionGuard;
+use App\Support\Csp;
 use App\Support\View as ViewSupport;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -52,6 +53,9 @@ class MfaController extends AbstractController
 
             return $this->redirect('/login');
         }
+
+        // MFA 通过后仍要跳回原客户端，CSP 的 form-action 需要提前放行
+        Csp::allowForAuthorizationUrl($this->guard->peekIntended());
 
         return $this->view->render('auth.mfa', [
             'pageTitle' => '两步验证',

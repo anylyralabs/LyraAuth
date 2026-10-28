@@ -14,6 +14,7 @@ use App\Service\AuditService;
 use App\Service\OAuthServerService;
 use App\Service\SettingsService;
 use App\Service\SessionGuard;
+use App\Support\Csp;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
 use Hyperf\HttpServer\Annotation\PostMapping;
@@ -223,6 +224,9 @@ class AuthorizeController extends AbstractController
             ->keyBy('identifier');
 
         $clientModel = OauthClient::query()->where('client_id', $client->getIdentifier())->first();
+
+        // 同意页提交后直接 302 到客户端回调地址，需放行该源
+        Csp::allowFormActionForClient($clientModel);
 
         return $this->view->render('oauth.consent', [
             'pageTitle' => '授权 ' . $client->getName(),

@@ -71,6 +71,23 @@ tmp/                   本地验证脚本
 - 需要下发附加 Cookie 时用 `PendingCookieMiddleware::add()`：它位于中间件链最外层，
   在所有内层中间件之后用 `withAddedHeader` 追加，已在「记住此设备」中验证。
 
+### CSP 的 form-action（踩过的坑）
+- **浏览器会校验整条重定向链的终点，不只是表单的 `action`。**
+  登录 POST 的链路是
+  `POST /login → 302 /oauth/authorize → 302 <客户端 redirect_uri>`；
+  最后一段跨源，会被 `form-action 'self'` 丢弃——服务端其实已经登录成功
+  （会话值已轮换、审计有 `auth.login.success`），但浏览器把导航丢了，
+  表现为「点登录没反应、地址不变、也没有 3xx」。
+- 直接打开 IdP 登录页时终点是 `/dashboard`（同源），**测不出这个问题**。
+  复现必须从 RP 发起：`GET <rp>/login → IdP 授权端点 → /login → POST`。
+- 判定手段只有一个：浏览器控制台的
+  `Sending form data to ... violates ... "form-action 'self'"`。
+  CDP 的 `Network` 面板看不到这条，curl 更看不到。
+- 解决方式是「按需精确放行」，不是 `form-action *`：
+  渲染表单的控制器（登录页 / MFA 页 / 同意页 / 登出页）调用
+  `Csp::allowFormActionForClient()` 或 `Csp::allowForAuthorizationUrl()`，
+  只把当前流程那个客户端的回调源加进白名单；未登记时等价于 `'self'`。
+
 ### 安全
 - 所有非幂等请求经 `CsrfMiddleware` 校验 `_token`；
   OAuth token / introspect / revoke / device_authorization 与 `.well-known` 端点豁免。

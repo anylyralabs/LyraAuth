@@ -302,6 +302,14 @@ class SessionGuard
         return is_string($value) && $value !== '' ? $value : null;
     }
 
+    /** 只读取登录前目标地址，不消费（用于渲染期解析来源客户端） */
+    public function peekIntended(): ?string
+    {
+        $value = $this->session->get('url.intended');
+
+        return is_string($value) && $value !== '' ? $value : null;
+    }
+
     public function regenerateCsrfToken(): string
     {
         return $this->session->regenerateToken();

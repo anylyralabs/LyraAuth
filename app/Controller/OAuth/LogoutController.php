@@ -12,6 +12,7 @@ use App\Model\User;
 use App\Service\AuditService;
 use App\Service\SessionGuard;
 use App\Service\SettingsService;
+use App\Support\Csp;
 use App\Support\View as ViewSupport;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -48,6 +49,9 @@ class LogoutController extends AbstractController
         if (! $this->guard->check()) {
             return $this->finish($client, $redirect, $state);
         }
+
+        // 登出提交后会 302 回客户端的 post_logout_redirect_uri
+        Csp::allowFormActionForClient($client);
 
         return $this->view->render('auth.logout', [
             'pageTitle' => '退出登录',

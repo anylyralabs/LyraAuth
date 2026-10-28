@@ -10,6 +10,7 @@ use App\Service\AuditService;
 use App\Service\AuthService;
 use App\Service\MfaService;
 use App\Service\SessionGuard;
+use App\Support\Csp;
 use App\Support\View as ViewSupport;
 use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Annotation\GetMapping;
@@ -135,6 +136,10 @@ class AuthController extends AbstractController
 
     private function renderLogin(array $data = [], int $status = 200): ResponseInterface
     {
+        // form-action 会校验重定向链终点：登录成功后要跳回客户端回调地址，
+        // 这里按会话里的登录前目标登记该客户端的源，否则浏览器会丢弃跳转。
+        Csp::allowForAuthorizationUrl($this->guard->peekIntended());
+
         $response = $this->view->render('auth.login', array_merge([
             'pageTitle' => '登录',
             'identifier' => '',
