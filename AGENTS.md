@@ -58,6 +58,19 @@ tmp/                   本地验证脚本
 - 自定义指令监听器必须挂 `BeforeWorkerStart`，主进程注册不会传递给 worker。
 - 协程内不要用阻塞 IO；SMTP 已改用 `Swoole\Coroutine\Client`。
 
+### Cookie（踩过的坑）
+- `session.options.domain` 必须是**空字符串**，不能写 `null`：
+  Hyperf 在 `null` 时会回退成 `$uri->getHost()`，输出 `Domain=localhost`。
+  RFC 6265 §5.2.3 禁止单标签主机名作为 Cookie Domain，Chromium / Firefox
+  会**整条丢弃**该 `Set-Cookie`，表现为「页面能打开但登录永远无效、点击无反应」。
+  curl 不校验此规则，所以命令行测试看不出来。
+- 不要在控制器里用 `$response->withCookie()`：`Hyperf\HttpServer\Response`
+  只有 `withCookie()` 而没有 `getCookies()`，`ResponseEmitter` 遍历不到，Cookie 被静默丢弃。
+- 也不要直接写 `Set-Cookie` 头：`SessionMiddleware` 在控制器之后用
+  `withHeader('Set-Cookie', ...)` 写入会话 Cookie，会把先前的值整条覆盖。
+- 需要下发附加 Cookie 时用 `PendingCookieMiddleware::add()`：它位于中间件链最外层，
+  在所有内层中间件之后用 `withAddedHeader` 追加，已在「记住此设备」中验证。
+
 ### 安全
 - 所有非幂等请求经 `CsrfMiddleware` 校验 `_token`；
   OAuth token / introspect / revoke / device_authorization 与 `.well-known` 端点豁免。
@@ -151,7 +164,12 @@ chromium --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage \
 VERIFY_BASE=http://127.0.0.1:9501 node tmp/verify-auth-flow.mjs   # 注册→验证→登录→登出
 MFA_EMAIL=admin@lyraauth.local MFA_PASSWORD=... node tmp/verify-mfa.mjs  # TOTP 全流程
 ADMIN_PASSWORD=... TOTP_SECRET=... node tmp/ui-audit.mjs /tmp/opencode/shots  # 全站视觉审计
+VERIFY_PASSWORD=... VERIFY_BASE=http://localhost:9501 node tmp/verify-login-cookie.mjs  # Cookie 与登录回跳
 ```
+
+**必须用 `localhost` 而不是 `127.0.0.1` 跑 Cookie 相关验证**：
+浏览器对 Cookie 域名的校验只在真实域名/单标签主机名下生效，`127.0.0.1` 是 IP 字面量，
+走的是另一条规则，会掩盖 `Domain=localhost` 这类问题。`curl` 同样不校验，不能作为判据。
 
 验证结论必须来自真实浏览器——jsdom 无法判断布局与 WebAuthn。
 

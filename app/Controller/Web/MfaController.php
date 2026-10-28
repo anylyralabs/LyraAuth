@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Web;
 
 use App\Controller\AbstractController;
+use App\Middleware\PendingCookieMiddleware;
 use App\Model\User;
 use App\Service\AuditService;
 use App\Service\AuthService;
@@ -170,17 +171,26 @@ class MfaController extends AbstractController
         // 记住设备：写入 30 天有效的 HMAC 令牌，下次登录跳过二次验证
         if ($rememberDevice && $this->request->input('remember_device') !== null) {
             $plain = $this->mfa->trustDevice($user, $this->audit->userAgent());
-            $response = $response->withCookie(new \Hyperf\HttpMessage\Cookie\Cookie(
+            $cookie = new \Hyperf\HttpMessage\Cookie\Cookie(
                 self::TRUSTED_COOKIE,
                 $plain,
                 time() + MfaService::TRUSTED_DEVICE_TTL,
                 '/',
-                null,
+                // 必须为空串（host-only）：传 null 会触发 TypeError，
+                // 且单标签主机名（localhost）不允许出现在 Domain 属性里。
+                '',
                 str_starts_with((string) $this->request->getUri()->getScheme(), 'https'),
                 true,
                 false,
                 'lax'
-            ));
+            );
+
+            // 不能用 $response->withCookie()：Hyperf\HttpServer\Response 只有 withCookie(),
+            // 没有 getCookies()，ResponseEmitter 遍历不到，Cookie 会被静默丢弃。
+            // 也不能直接写 Set-Cookie 头：SessionMiddleware 在控制器之后用
+            // withHeader('Set-Cookie') 写入会话 Cookie，会把这里的值整条覆盖。
+            // 因此交给最外层 PendingCookieMiddleware 追加。
+            PendingCookieMiddleware::add((string) $cookie);
         }
 
         return $response;
